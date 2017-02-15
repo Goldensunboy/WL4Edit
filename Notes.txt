@@ -1,0 +1,299 @@
+General Notes
+-------------
+
+ldmia r1!,{r2,r3,r5} ; \ This copies 36 (0x24) bytes from [r1] to [r0]
+stmia r0!,{r2,r3,r5} ; |
+ldmia r1!,{r2,r3,r5} ; |
+stmia r0!,{r2,r3,r5} ; |
+ldmia r1!,{r2,r3,r5} ; |
+stmia r0!,{r2,r3,r5} ; /
+
+
+RAM Notes
+---------
+
+0x3000002: Selected passage:
+  00: Beginning
+  01: Emerald
+  02: Ruby
+  03: Topaz
+  04: Saphhire
+  05: Golden
+  06: Sound room
+
+0x3000003: Selected level in passage:
+  00: Level 1
+  01: Level 2
+  02: Level 3
+  04: Level 4
+  05: Mini-game shop
+  06: Boss door
+
+0x3000004: Current level number (used for level data)
+  00: Hall of Heiroglyphs
+  01: Palm Tree Paradise
+  02: Wildflower Fields
+  03: Mystic Lake
+  04: Monsoon Jungle
+  05: Cractus Passage and Fight
+  06: ???
+  07: The Curious Factory
+  08: The Toxic Landfill
+  09: 40 Below Fridge
+  0A: Pinball Zone
+  0B: Cuckoo Condor Passage and Fight
+  0C: ???
+  0D: Toy Block Tower
+  0E: The Big Board
+  0F: Doodle Zone
+  10: Domino Row
+  11: Aerodent Passage and Fight
+  12: ???
+  13: Crescent Moon Village
+  14: Arabian Night
+  15: Fiery Cavern
+  16: Hotel Horror
+  17: Catbat Passage and Fight
+  18: ???
+  19: Golden Diva Passage and Fight
+  1A: ???
+  1B: ???
+  1C: Golden Passage
+
+0x3000023: Current level number (partially used for some data):
+  00: Hall of Heiroglyphs
+  01: Palm Tree Paradise
+  02: Wildflower Fields
+  03: Mystic Lake
+  04: Monsoon Jungle
+  05: The Curious Factory
+  06: The Toxic Landfill
+  07: 40 Below Fridge
+  08: Pinball Zone
+  09: Toy Block Tower
+  0A: The Big Board
+  0B: Doodle Zone
+  0C: Domino Row
+  0D: Crescent Moon Village
+  0E: Arabian Night
+  0F: Fiery Cavern
+  10: Hotel Horror
+  11: Cractus Passage and Fight
+  12: Cuckoo Condor Passage and Fight
+  13: Aerodant Passage and Fight
+  14: Catbat Passage and Fight
+  15: Golden Diva Passage and Fight
+  16: ???
+  17: Golden Passage
+
+0x3000024: Possibly the starting area for the level? Untested
+
+Level loading notes
+-------------------
+
+Process (following parenthesized values are dynamic values for Hall of Heiroglyphs):
+  - Copy 0x2C bytes from 0x78F280 pointer table to 0x3000074 (level header data)
+  - Copy 0x24 bytes from 0x3F2298 array directly to the stack (contains tileset pointers)
+      sp + 0x00 (0x08418A3C): Pointer to layer 0 + 1 tile graphics
+      sp + 0x04 (0x00006780): Number of bytes the layer 0 + 1 tile graphics take up
+      sp + 0x08 (0x08583C7C): Pointer to 256-color stage palette
+      sp + 0x0C (0x084E851C): Layer 3 graphics
+      sp + 0x10 (0x000024A0): Number of bytes the layer 3 tile graphics take up
+      sp + 0x14 (0x08557ABC): Pointer to layer 1 map16 table
+      sp + 0x18 (0x08551374): ???
+      sp + 0x1C (0x0858DDBC): ???
+      sp + 0x20 (0x08556DDC): ???
+
+Layer 3 (far BG) graphics are DMA'd into (0x600FFE0 - size_in_bytes)
+Small DMA from 0x3F2020 to 0x600FFE0 (size 0x10 halfwords)
+DMA from 0x201F041 to 0x6003000 (size X bytes)
+  X is return value (in r0) from subroutine at 0x6BDF8, the area loading subroutine
+  This DMA is probably copying BG map data directly to memory (layer 3?)
+
+DMA from 0x616868 to 0x6004000 (size 0x40 halfwords)
+DMA from 0x617368 to 0x6004080 (size 0x40 halfwords)
+DMA from 0x6141E8 to 0x6004100 (size 0x40 halfwords)
+DMA from 0x610EE8 to 0x6004180 (size 0x40 halfwords)
+DMA from 0x61BAE8 to 0x6004200 (size 0x40 halfwords)
+DMA from 0x610CE8 to 0x6004280 (size 0x40 halfwords)
+DMA from 0x6110E8 to 0x6004300 (size 0x40 halfwords)
+DMA from 0x614368 to 0x6004380 (size 0x40 halfwords)
+DMA from 0x619468 to 0x6004400 (size 0x40 halfwords)
+DMA from 0x619668 to 0x6004480 (size 0x40 halfwords)
+DMA from 0x619868 to 0x6004500 (size 0x40 halfwords)
+DMA from 0x619A68 to 0x6004580 (size 0x40 halfwords)
+DMA from 0x61C368 to 0x6004600 (size 0x40 halfwords)
+DMA from 0x61C4E8 to 0x6004680 (size 0x40 halfwords)
+DMA from 0x60FAE8 to 0x6004700 (size 0x40 halfwords)
+DMA from 0x616868 to 0x6004780 (size 0x40 halfwords)
+DMA from 0x34BD82 to 0x6010000 (size 0x120 bytes)
+DMA from 0x34BEA2 to 0x6010400 (size 0x100 bytes)
+DMA from 0x30030D0 (RAM) to 0x5000200 (size 0x20 bytes, OAM data?)
+DMA from 0x403AE8 to 0x6011080 (size 0x10 halfwords)
+DMA from 0x403C68 to 0x6011000 (size 0x10 halfwords)
+DMA from 0x403DE8 to 0x6011400 (size 0x10 halfwords)
+DMA from 0x403C48 to 0x6011040 (size 0x10 halfwords)
+DMA from 0x403DC8 to 0x6011440 (size 0x10 halfwords)
+DMA from 0x403C48 to 0x6011060 (size 0x10 halfwords)
+DMA from 0x403DC8 to 0x6011460 (size 0x10 halfwords)
+DMA from 0x403D88 to 0x6011020 (size 0x10 halfwords)
+DMA from 0x403F08 to 0x6011420 (size 0x10 halfwords)
+DMA from 0x414A64 to 0x5000280 (size 0x10 halfwords, OAM data?)
+DMA from 0x4045C8 to 0x6011C20 (size 0x10 halfwords)
+DMA from 0x4045E8 to 0x6012020 (size 0x10 halfwords)
+DMA from 0x404608 to 0x6012000 (size 0x10 halfwords)
+DMA from 0x404628 to 0x6011C00 (size 0x10 halfwords)
+DMA from 0x352CF0 to 0x6017800 (size loaded as int32 from 0x3B2C90 = #0x800 bytes)
+DMA from 0x3B14F0 to 0x50003E0 (size 0x10 halfwords, OAM data?)
+DMA from 0x365CF0 to 0x6014000 (size loaded as int32 from 0x3B2CF4 = #0x2000 bytes)
+  (...)
+
+Loading 8x8 tiles from map16 starting at 0x6BC72
+0x30031F4 contains a pointer to data used here (Hall of Heiroglyphs: 0x557ABC)
+
+Tileset DMA into character bank 1 and 2 at 0x6B4C8 from [sp], originating from table at 0x3F2298
+Blank tile DMA into character bank 1 at 0x6B4E8, palette DMA immediately after
+
+To break on loading specific area data: 806BDF8, r1 = 85994CB (r1 is address of area being loaded)
+
+Pointer table 1: 0x78F280 (level data)
+
+Level number set by 0x7A754 (strb r0, [r1]) before enter level animation
+Load current level number: 0x6BD70 (ldr r0, =#0x3000023; ldrb r0, [r0])
+
+Call to the full level load routine: 0x1C266 (bl #0x806B410)
+Area loading subroutine begins 0x6BDF8.
+Caller: 0x6BDAE (bl #0x806BDF8)
+  Caller: 0x6B4C4 (bl #0x806BD64)
+Loading area data by count from level data: 0x6BD9C (ldr r1, [r5, #0xC])
+  r5 points to area data
+  r6 used as increasing area index (from 0 up to 15?)
+  r8 points to exclusive upper bound for r6, level-specific
+
+Data + 00: Area width (in map16 tiles)
+       01: Area height (in map16 tiles)
+       02: Type of RLE for this entire data segment:
+             01: 1-byte RLE. Runs determined by 1 byte, 1 data byte per run, 1 byte of 0x00 used to terminate
+             02: 2-byte RLE. Runs determined by 2 bytes, 1 data byte per run, 2 bytes of 0x00 used to terminate
+       03: RLE data. End marked by 0
+             First byte designates length and RLE type.
+               Upper bit set: Write the next byte N times
+               Not set: Copy the next N bytes
+       XX: RLE data. End marked by 0
+       The first RLE data is used as lower bytes, and the second as upper bytes for
+       the resulting array of shorts defining the area data.
+       The resulting decompressed area data:
+         - A short containing the area width in map16 tiles
+         - A short containing the area height in map16 tiles
+         - An array of shorts (width * height in length) referencing map16 entries; upper bound 0x2FF for valid tiles
+
+Area loading subroutine notes:
+
+  ; Preconditions:
+  ;   r1 = ROM address to load area DATA from
+  ;   r2 = RAM address to write area DATA to
+  ;   r5 = 0
+
+0x6BDF8:
+  [...]
+
+0x6BE38:
+  ldrb r0, [r1]  ; This stores the area width to memory
+  strb r0, [r1]  ; Store byte from DATA[0] as halfword at RAM[0] (little endian)
+  add  r1, #0x1  ; r1 = DATA + 1
+  add  r2, #0x1  ; r2 = RAM + 2
+  strb r5, [r2]  ;
+  add  r2, #0x1  ;
+
+  ldrb r0, [r1]  ; This stores the area height to memory
+  strb r0, [r1]  ; Store byte from DATA[1] as halfword at RAM[2] (little endian)
+  add  r1, #0x1  ; r1 = DATA + 2
+  add  r2, #0x1  ; r2 = RAM + 4
+  strb r5, [r2]  ;
+  add  r2, #0x1  ;
+
+  mov  r6, r2    ; r6 = RAM + 4
+  mov  r4, #0x0  ; r4 = 0
+0x6BE54:
+  ldrb r0, [r1]  ; r0 = DATA[2]
+  add  r1, #0x1  ; r1 = DATA + 3
+  cmp  r0, #0x1  ; If DATA[2] != 1, then execute 0x6BE9E
+  bne #0x806BE9E ;
+
+  ldrb r3, [r1]  ; r3 = DATA[3]
+  add  r1, #0x1  ; r1 = DATA + 4
+  add  r4, #0x1  ; r4 = 1
+  cmp  r3, #0x0  ; If DATA[3] == 0, then execute 0x6BEF6
+  beq #0x806BEF6 ;
+
+0x6BE66:
+  mov  r0, #0x80 ; If highest bit of DATA[3] is clear, execute 0x6BE90
+  and  r0, r3    ;
+  cmp  r0, #0x0  ;
+  beq #0x806BE90 ;
+
+  mov  r0, #0x7F ; r3 = DATA[3] & 0x7F
+  and  r3, r0    ; If r3 == 0, then skip following copy loop
+  cmp  r3, #0x0  ; (branch to 0x6BE82)
+  beq #0x806BE82 ;
+
+0x6BE76:
+  ldrb r0, [r1]  ; Copy loop. Store the byte value from DATA[4] starting at
+  strb r0, [r2]  ; RAM + 4, as halfwords (little endian). Do so
+  add  r2, #0x2  ; (DATA[3] & 0x7F) times.
+  sub  r3, #0x1  ; Example:
+  cmp  r3, #0x0  ;   0x83 0x51 -> 0x51 0x00 0x51 0x00 0x51 0x00
+  bne #0x806BE76 ;
+
+0x6BE82:
+  add  r1, #0x1  ; r1++
+  b   #0x806BE94 ; Goto 0x6BE94
+
+0x6BE86:
+  ldrb r0, [r1]  ; Copy loop. (???)
+  strb r0, [r2]  ;
+  add  r1, #0x1  ;
+  add  r2, #0x2  ;
+  sub  r3, #0x1  ;
+  cmp  r3, #0x0  ;
+  bne #0x806BE86 ;
+
+0x6BE94:
+  ldrb r3, [r1]  ; If the end of RLE hasn't been reached
+  add  r1, #0x1  ; (marker = 0) then copy more data by going back
+  cmp  r3, #0x0  ; to 0x6BE66
+  bne #0x806BE86 ; If done, go to 0x6BEF6
+  b   #0x806BEF6 ;
+
+0x6BE9E:
+  ldrb r3, [r1]  ; \ r3 = 16-bit value from data (BIG ENDIAN!)
+  add  r1, #0x1  ; |
+  lsl  r3, r3, 8 ; |
+  ldrb r0, [r1]  ; |
+  orr  r3, r0    ; |
+  add  r1, #0x1  ; /
+  add  r4, #0x1  ; 
+  cmp  r3, #0x0  ; 
+  beq #0x806BEF6 ; 
+
+0x6BEF6:
+  add  r2, r6, 1 ; r2 = DATA + 5
+  cmp  r4, #0x1  ; If r4 <= 1, then go to 0x6BE54
+  ble #0x806BE54 ;
+
+
+
+Level-specific notes
+--------------------
+
+DMA Tileset address from [sp] = 0x418A3C at 0x6B4C8
+DMA blank tile graphics into videobuffer: 0x6B4E8 (from 0x3F2020, hardcoded)
+DMA palette data to memory: 0x6B4F6 (from 0x583C7C, dynamic)
+
+Loaded (level ID?) from working RAM: 0x6B50A (ldr r0, =#0x3000003; ldrb r0, [r0]) = 0
+Loaded OBJ palette from sp + #0x20: 0x6B512 (ldr r0, [sp, #0x20]) = 0x08556DDC (it is used in DMA)
+
+Hallway of Heiroglyphs map data loaded starting from 0x5991DC
+First RLE segment ends at 0x599440
+First area data (there are 13) loaded from 0x3F4F38; map data pointer from +0x0C (0x085991DC)
+Number of areas for Hall of Heiroglyphs (13) loaded from 0x639069 as byte
