@@ -16,7 +16,7 @@ import wl4.GBAPalette;
 import wl4.Map16Tile;
 import wl4.Tile8x8;
 import wl4.WL4Area;
-import wl4.WL4Edit;
+import wl4.WL4Constants;
 import wl4.WL4Level;
 
 /**
@@ -97,7 +97,7 @@ public class DataTester {
 							initializePanel(--levelIdx, areaIdx);
 						}
 					} else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-						if(levelIdx < WL4Edit.LEVEL_COUNT - 1) {
+						if(levelIdx < WL4Constants.LEVEL_COUNT - 1) {
 							areaIdx = 0;
 							initializePanel(++levelIdx, areaIdx);
 						}
@@ -109,6 +109,8 @@ public class DataTester {
 						if(areaIdx < levels[levelIdx].areas.length - 1) {
 							initializePanel(levelIdx, ++areaIdx);
 						}
+					} else if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						System.exit(0);
 					}
 				}
 				@Override
@@ -189,6 +191,8 @@ public class DataTester {
 						if(mapIdx < map16arr.length - 1) {
 							initializePanel(++mapIdx);
 						}
+					} else if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						System.exit(0);
 					}
 				}
 				@Override
@@ -284,6 +288,8 @@ public class DataTester {
 							setPalette(++palIdx);
 							repaint();
 						}
+					} else if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						System.exit(0);
 					}
 				}
 				@Override
