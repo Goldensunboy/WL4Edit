@@ -88,8 +88,23 @@ RAM Notes
 
 0x3000024: Possibly the starting area for the level? Untested
 
+0x3000074: Wario's current area. Used as an index in many places for tileset and animation data
+
 Level loading notes
 -------------------
+
+Break on loading animated tileset: [6004000..60047FF]!
+Area initial loading animated tileset loop begins 0x6E20C (ldr r0, =#3000074)
+Loading animation data after determining no dependence on switches 0x6E248 (r2 = level header[0])
+  Loads tileset index from level header[0], multiply by 16, add to 0x3F8C18
+  This 16-byte table contains values which describe how graphics can change depending on switches:
+    00: Switches do not affect graphics
+    01: Switch 1
+    02: Switch 2
+    03: Switch 3
+    04: Frog switch
+  Switch status is loaded from 0x300002E + the above value, which is always 00 for 0x300002E itself
+
 
 Process (following parenthesized values are dynamic values for Hall of Heiroglyphs):
   - Copy 0x2C bytes from 0x78F280 pointer table to 0x3000074 (level header data)
@@ -110,22 +125,23 @@ DMA from 0x201F041 to 0x6003000 (size X bytes)
   X is return value (in r0) from subroutine at 0x6BDF8, the area loading subroutine
   This DMA is probably copying BG map data directly to memory (layer 3?)
 
-DMA from 0x616868 to 0x6004000 (size 0x40 halfwords)
-DMA from 0x617368 to 0x6004080 (size 0x40 halfwords)
-DMA from 0x6141E8 to 0x6004100 (size 0x40 halfwords)
-DMA from 0x610EE8 to 0x6004180 (size 0x40 halfwords)
-DMA from 0x61BAE8 to 0x6004200 (size 0x40 halfwords)
-DMA from 0x610CE8 to 0x6004280 (size 0x40 halfwords)
-DMA from 0x6110E8 to 0x6004300 (size 0x40 halfwords)
-DMA from 0x614368 to 0x6004380 (size 0x40 halfwords)
-DMA from 0x619468 to 0x6004400 (size 0x40 halfwords)
-DMA from 0x619668 to 0x6004480 (size 0x40 halfwords)
-DMA from 0x619868 to 0x6004500 (size 0x40 halfwords)
-DMA from 0x619A68 to 0x6004580 (size 0x40 halfwords)
-DMA from 0x61C368 to 0x6004600 (size 0x40 halfwords)
-DMA from 0x61C4E8 to 0x6004680 (size 0x40 halfwords)
-DMA from 0x60FAE8 to 0x6004700 (size 0x40 halfwords)
-DMA from 0x616868 to 0x6004780 (size 0x40 halfwords)
+DMA from 0x616868 to 0x6004000 (size 0x40 halfwords) ; \ Loading the animated tiles into low tile slots
+DMA from 0x617368 to 0x6004080 (size 0x40 halfwords) ; | Slots 0 - 3F. Starting addresses obtained through
+DMA from 0x6141E8 to 0x6004100 (size 0x40 halfwords) ; | a pretty complex process of checking which area is
+DMA from 0x610EE8 to 0x6004180 (size 0x40 halfwords) ; | loaded, evaluating an animation timer, checking the
+DMA from 0x61BAE8 to 0x6004200 (size 0x40 halfwords) ; | status of the switches, etc.
+DMA from 0x610CE8 to 0x6004280 (size 0x40 halfwords) ; |
+DMA from 0x6110E8 to 0x6004300 (size 0x40 halfwords) ; | Address obtained from table copied to RAM 0x3003B08
+DMA from 0x614368 to 0x6004380 (size 0x40 halfwords) ; | table, 12-byte entries containing GFX pointer at
+DMA from 0x619468 to 0x6004400 (size 0x40 halfwords) ; | entry + 8.
+DMA from 0x619668 to 0x6004480 (size 0x40 halfwords) ; |
+DMA from 0x619868 to 0x6004500 (size 0x40 halfwords) ; |
+DMA from 0x619A68 to 0x6004580 (size 0x40 halfwords) ; |
+DMA from 0x61C368 to 0x6004600 (size 0x40 halfwords) ; |
+DMA from 0x61C4E8 to 0x6004680 (size 0x40 halfwords) ; |
+DMA from 0x60FAE8 to 0x6004700 (size 0x40 halfwords) ; |
+DMA from 0x616868 to 0x6004780 (size 0x40 halfwords) ; /
+
 DMA from 0x34BD82 to 0x6010000 (size 0x120 bytes)
 DMA from 0x34BEA2 to 0x6010400 (size 0x100 bytes)
 DMA from 0x30030D0 (RAM) to 0x5000200 (size 0x20 bytes, OAM data?)

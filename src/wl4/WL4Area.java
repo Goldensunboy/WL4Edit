@@ -1,8 +1,6 @@
 package wl4;
 
 import java.awt.Graphics;
-import java.util.HashSet;
-import java.util.Set;
 
 import wl4.WL4Utils.RLEData;
 
@@ -21,11 +19,6 @@ public class WL4Area {
 	
 	public String name;
 	public int hptr;
-	
-	public static Set<Short> shorts = new HashSet<Short>();
-	private void do_thing(short s) {
-		shorts.add(s);
-	}
 	
 	/**
 	 * Construct a new Area object from ROM data and a starting address
@@ -59,7 +52,6 @@ public class WL4Area {
 		}
 		for(int i = 0; i < layer1Tiles.length; ++i) {
 			layer1Tiles[i] = (short) (((0xFF & upper.data[i]) << 8) | (0xFF & lower.data[i]));
-			do_thing(layer1Tiles[i]);
 		}
 	}
 	
