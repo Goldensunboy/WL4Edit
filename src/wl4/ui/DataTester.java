@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -16,7 +17,7 @@ import wl4.GBAPalette;
 import wl4.Map16Tile;
 import wl4.Tile8x8;
 import wl4.WL4Area;
-import wl4.WL4Constants;
+import wl4.WL4Edit;
 import wl4.WL4Level;
 
 /**
@@ -97,7 +98,7 @@ public class DataTester {
 							initializePanel(--levelIdx, areaIdx);
 						}
 					} else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-						if(levelIdx < WL4Constants.LEVEL_COUNT - 1) {
+						if(levelIdx < WL4Edit.LEVEL_COUNT - 1) {
 							areaIdx = 0;
 							initializePanel(++levelIdx, areaIdx);
 						}
@@ -125,6 +126,7 @@ public class DataTester {
 			this.setTitle(String.format("Area View: Level %02X, Area %02X", lidx, aidx));
 			getContentPane().removeAll();
 			JPanel panel = new TestPanel(levels[lidx].areas[aidx]);
+			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 			panel.add(Box.createRigidArea(new Dimension(levels[lidx].areas[aidx].width * 16 * SCALE,
 					levels[lidx].areas[aidx].height * 16 * SCALE)));
 			add(panel);
@@ -207,6 +209,7 @@ public class DataTester {
 			this.setTitle(String.format("Map16 View: Level %02X", idx));
 			getContentPane().removeAll();
 			JPanel panel = new TestPanel(map16arr[mapIdx]);
+			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 			panel.add(Box.createRigidArea(new Dimension(TILE_COUNT_X * 16 * SCALE, TILE_COUNT_Y * 16 * SCALE)));
 			add(panel);
 			pack();
@@ -246,6 +249,8 @@ public class DataTester {
 		private GBAPalette[][] palArr;
 		private int tileIdx = 0;
 		private int palIdx = 0;
+		private static final int TILE_COUNT_X = 32;
+		private static final int TILE_COUNT_Y = 48;
 		public Tile8x8TestFrame(Tile8x8[][] tilesArr, GBAPalette[][] palArr) {
 			this.tilesArr = tilesArr;
 			this.palArr = palArr;
@@ -305,7 +310,8 @@ public class DataTester {
 			setPalette(palIdx);
 			getContentPane().removeAll();
 			JPanel panel = new TestPanel(tilesArr[idx]);
-			panel.add(Box.createRigidArea(new Dimension(256 * SCALE, 256 * SCALE)));
+			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+			panel.add(Box.createRigidArea(new Dimension(TILE_COUNT_X * 8 * SCALE, TILE_COUNT_Y * 8 * SCALE)));
 			add(panel);
 			pack();
 		}
@@ -325,13 +331,12 @@ public class DataTester {
 				super.paintComponent(g);
 				g.setColor(Color.BLACK);
 				g.fillRect(0, 0, getWidth(), getHeight());
-				int i = 1;
 				int idx = 0;
-				while(i < 32 * 32 && i < tiles.length) {
-					int x = ((i % 32) * 8) * SCALE;
-					int y = ((i / 32) * 8) * SCALE;
-					Tile8x8 tile = tiles[idx++]; ++i;
-					tile.draw(g, x, y, SCALE);
+				for(int i = 0; i < TILE_COUNT_Y; ++i) {
+					for(int j = 0; j < TILE_COUNT_X; ++j) {
+						Tile8x8 tile = tiles[idx++];
+						tile.draw(g, j * 8 * SCALE, i * 8 * SCALE, SCALE);
+					}
 				}
 				g.setColor(Color.WHITE);
 				g.drawString(String.format("Level: %02X Palette: %X", tileIdx, palIdx), 5, getHeight() - 5);

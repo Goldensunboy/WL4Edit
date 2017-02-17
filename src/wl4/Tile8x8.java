@@ -60,6 +60,18 @@ public class Tile8x8 {
 	}
 	
 	/**
+	 * Copy constructor for data, but with different properties
+	 * @param other Another Tile8x8 to copy
+	 * @param properties The new properties
+	 */
+	public Tile8x8(Tile8x8 other, short properties, GBAPalette[] pals) {
+		this(other);
+		flipX = (properties & (1 << 0xA)) != 0;
+		flipY = (properties & (1 << 0xB)) != 0;
+		palette = pals[(properties >> 12) & 0xF];
+	}
+	
+	/**
 	 * Default constructor for uninitialized tiles
 	 */
 	private Tile8x8() {

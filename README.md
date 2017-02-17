@@ -9,7 +9,7 @@ WL4Edit is meant to eventually be a level editor for Wario Land 4; probably not 
 - Can read indexed 8x8 tile graphics directly from the ROM
 - Can read palette data from the ROM and apply it to 8x8 tiles
 - Can read map16 data which composes tiles and palettes into 16x16 pixel blocks
-- Can decompress and render levels using the above data
+- Can decompress and render most levels using the above data
 
 ## How?
 

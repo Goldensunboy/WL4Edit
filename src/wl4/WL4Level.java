@@ -15,9 +15,7 @@ public class WL4Level {
 	/**
 	 * Construct a new Level object
 	 * @param data The ROM data
-	 * @param hptr Pointer to the header data
-	 * @param dptr Pointer to the area data
-	 * @param tptr Pointer to tileset data base (to be offset by dptr[0])
+	 * @param lvidx The level index
 	 */
 	public WL4Level(String name, byte[] data, int lvidx) {
 

@@ -3,7 +3,6 @@ package wl4;
 public final class WL4Constants {
 	
 	/** Constants */
-	public static final int LEVEL_COUNT = 20;
 	public static final int LEVEL_DATA_PTR_TABLE = 0x78F280; // 4-byte pointers to 42-byte area entries
 		// 00   : (Offset / 36) from 0x3F2298 for tptr value for area tileset
 		//      : (Offset / 16) from 0x3F8C18 for animation data dependent upon switches
@@ -12,9 +11,16 @@ public final class WL4Constants {
 		//      :               Copy 7 bytes to RAM 0x3003B08:
 		//      :                 Src: AA BB CC xx DD DD DD DD
 		//      :                 Dst: AA BB 00 CC 00 xx xx xx DD DD DD DD
-		// 01-0B: Unknown
-		// 0C-0F: Pointer to first area data, subsequent areas are consecutive
-		// 10-2B: Unknown
+		// 01   : Layer 0 property bitvector (10 = enable, 20 = ???, 01 = ???, 02 = ???)
+		// 02   : Layer 1 properties (always 10)
+		// 03   : Layer 2 properties
+		// 04   : Layer 3 properties (commonly 20... ?)
+		// 05-07: Always 00
+		// 08-0B: Pointer to first area layer 0 data, subsequent areas are consecutive
+		// 0C-0F: Pointer to layer 1 data
+		// 10-13: Pointer to layer 2 data
+		// 14-17: Pointer to layer 3 data
+		// 18-2B: Unknown
 	public static final int LEVEL_HEADER_TABLE = 0x639068; // 12-byte entries (area count = offset +1)
 		// 00   : Unknown
 		// 01   : Number of areas
@@ -23,7 +29,7 @@ public final class WL4Constants {
 		// 00-03: Pointer to layer 0 + 1 tile graphics
 		// 04-07: Number of bytes the layer 0 + 1 tile graphics take up
 		// 08-0B: Pointer to 256-color stage palette
-    	// 0C-0F: Layer 3 graphics
+    	// 0C-0F: Pointer to layer 3 graphics
     	// 10-13: Number of bytes the layer 3 tile graphics take up
     	// 14-17: Pointer to layer 1 map16 table
 		// 18-1B: Unknown

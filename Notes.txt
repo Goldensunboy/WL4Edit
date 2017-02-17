@@ -88,10 +88,19 @@ RAM Notes
 
 0x3000024: Possibly the starting area for the level? Untested
 
+0x300005C: Pointer to foreground tile data in memory (4 bytes)
+0x3000060: Current area width (halfword)
+0x3000062: Current area height (halfword)
+0x3000064: Pointer to layer 2 tiles in memory
+0x3000068: Layer 2 width (halfword)
+0x300006A: Layer 2 height (halfword)
+
 0x3000074: Wario's current area. Used as an index in many places for tileset and animation data
 
 Level loading notes
 -------------------
+
+Layer map loading routine begins 0x6B722
 
 Break on loading animated tileset: [6004000..60047FF]!
 Area initial loading animated tileset loop begins 0x6E20C (ldr r0, =#3000074)
@@ -301,6 +310,9 @@ Area loading subroutine notes:
 
 Level-specific notes
 --------------------
+
+Loading layer 0 data from 0x598EEC into RAM 0x201C840 (caller: 0x6B7A0)
+2nd RLE data section begins 0x59910E
 
 DMA Tileset address from [sp] = 0x418A3C at 0x6B4C8
 DMA blank tile graphics into videobuffer: 0x6B4E8 (from 0x3F2020, hardcoded)
