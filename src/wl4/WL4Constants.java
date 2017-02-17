@@ -32,7 +32,7 @@ public final class WL4Constants {
 	public static final int ANIMATION_GFX_TABLE = 0x3F7828; // 8-byte entries
 		// 00-03: Unknown
 		// 04-07: Pointer to graphics for animation tiles
-	public static final int ANIMATION_UNKNOWN_TABLE = 0x3F8098; // 32-byte entries
+	public static final int ANIMATION_FRAME_TABLE = 0x3F8098; // 32-byte entries
 		// 00-01: (halfword / 8) indexing table 0x3F7828 for animation frame entries
 	public static final int ANIMATION_SWITCH_TABLE = 0x3F8C18; // 16-byte entries
 		// These entries are offsets into table in work RAM 0x300002E which contains RAM controlling animation

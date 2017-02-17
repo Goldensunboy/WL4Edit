@@ -24,6 +24,16 @@ public class WL4Utils {
 	}
 	
 	/**
+	 * Load a litt-endian short value from ROM data
+	 * @param data The ROM data
+	 * @param addr The address of the short value
+	 * @return The short value
+	 */
+	public static int GetShort(byte[] data, int addr) {
+		return (data[addr] & 0xFF) | ((data[addr + 1] & 0xFF) << 8);
+	}
+	
+	/**
 	 * Print data for ease of use in viewing the bytes
 	 * @param data ROM data
 	 * @param ptr Pointer to first byte of data to print
@@ -31,7 +41,7 @@ public class WL4Utils {
 	 * @param width Number of bytes per line
 	 * @param tabs Number of tabs to prefix each line
 	 */
-	public static void printData(byte[] data, int ptr, int count, int width, int tabs) {
+	public static void PrintData(byte[] data, int ptr, int count, int width, int tabs) {
 		for(int i = 0; i < count; ++i) {
 			if(i % width == 0) {
 				if(i != 0) {

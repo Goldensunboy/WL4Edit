@@ -33,8 +33,9 @@ public class WL4Area {
 		// Get header information
 		this.name = name;
 		
-		// Load graphical information
-		int tptr = WL4Constants.LEVEL_TILESET_TABLE + (data[ahptr] & 0xFF) * 36;
+		// Load static graphical information
+		int toffset = (data[ahptr] & 0xFF);
+		int tptr = WL4Constants.LEVEL_TILESET_TABLE + toffset * 36;
 		int palPtr = WL4Utils.GetPointer(data, tptr + 8);
 		for(int i = 0; i < 16; ++i) {
 			palette[i] = new GBAPalette(data, palPtr + (i << 5));
@@ -48,6 +49,16 @@ public class WL4Area {
 		}
 		for(int i = 0; i + 0x41 < layer0and1tiles.length; ++i) {
 			layer0and1tiles[i + 0x41] = new Tile8x8(data, tileGFXptr + (i << 5));
+		}
+		
+		// Load animated graphical information
+		int fptr = WL4Constants.ANIMATION_FRAME_TABLE + (toffset << 5);
+		for(int i = 0; i < 16; ++i) {
+			int fidx = WL4Utils.GetShort(data, fptr + (i << 1));
+			int gidx = WL4Utils.GetPointer(data, WL4Constants.ANIMATION_GFX_TABLE + (fidx << 3) + 4);
+			for(int j = 0; j < 4; ++j) {
+				layer0and1tiles[(i << 2) + j] = new Tile8x8(data, gidx + (j << 5));
+			}
 		}
 		
 		// Load map16 information

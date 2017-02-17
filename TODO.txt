@@ -4,7 +4,7 @@ Bugs:
 
 Milestone:
 
-- Fix animated layer 1 tiles like the frog blocks from not rendering (requires research into animation procedures)
+- Figure out why foreground tiles don't render in some areas like 01-05 and 01-09
 - Figure out why some levels like Domino Row don't display all their areas in WL4Edit
 - Add layer 0 decoding/rendering (near BG)
 - Add layer 3 decoding/rendering (far BG)
