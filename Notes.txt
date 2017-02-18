@@ -88,6 +88,10 @@ RAM Notes
 
 0x3000024: Possibly the starting area for the level? Untested
 
+0x300002A: Light blurring (0 - 0x10)
+0x300002B: Lighting (0 - 0x10)
+0x3000037: Waving background
+
 0x300005C: Pointer to foreground tile data in memory (4 bytes)
 0x3000060: Current area width (halfword)
 0x3000062: Current area height (halfword)
@@ -97,8 +101,96 @@ RAM Notes
 
 0x3000074: Wario's current area. Used as an index in many places for tileset and animation data
 
+0x30000D8: Set alpha-blended layer's level (0 - 0x10)
+0x30000D9: Layer alpha (?)
+0x30000DA: Alpha blending target layers
+
 Level loading notes
 -------------------
+
+Alpha blending performed by writing 0x3E41 to BLDCNT
+Alpha blending enabled if ahptr[0x1A] > 7
+If alpha blending enabled, goto 0x1C324 to set BLDCNT
+  Then, proceed after VBlank is reached
+
+0x6B3E8: Stores character base block in r0, used in preparation of LCD I/O BG control
+Layer priority is set in subroutine 0x6AF4C:
+    NOTE: This function extensively uses switch tables! Destination addresses hardcoded
+    into tables 0x6AFFC and 0x6B174, triggered by loading r15 (program counter)
+  Start with priority 0 0 0 3
+  Begin switching on priority index at code 0x6AFE2 (table 0x6AFFC):
+    if((val = ahptr[0x1A]) < 5 || (val & 3) == 0) {
+      0x6B0CC:
+        Layer 1 pri = 1
+        Layer 2 pri = 2
+    } else if((val & 3) == 1) {
+      0x6B0E2:
+        Layer 0 pri = 1
+        Layer 2 pri = 2
+    } else if((val & 3) == 2) {
+      0x6B102:
+        Layer 0 pri = 1
+        Layer 2 pri = 2
+        [0x3000033] = 1
+    } else { // (val & 3) == 3
+      0x6B12C:
+        Layer 0 pri = 2
+        Layer 2 pri = 1
+        [0x3000033] = 1
+    } // maximum value: 0x33
+  Switch on table 0x6B174:
+    r3 = 0
+    switch((ahptr[0x1A] - 8) / 4):
+      00
+        0x6B240:
+        r3 = 0x07
+        goto 0x6B2B8
+      01
+        0x6B244:
+        r3 = 0x0A
+        goto 0x6B2B8
+      02
+        0x6B248:
+        r3 = 0x0D
+        goto 0x6B2B8
+      03
+        0x6B24C:
+        r3 = 0x10
+        goto 0x6B2B8
+      04
+        0x6B224:
+        r2 = 0x00
+        goto 0x6B24E
+      05
+        0x6B228:
+        r2 = 0x03
+        goto 0x6B24E
+      06
+        0x6B22C:
+        r2 = 0x06
+        goto 0x6B24E
+      07
+        0x6B230:
+        r2 = 0x09
+        goto 0x6B24E
+      08
+        0x6B234:
+        r2 = 0x0B
+        goto 0x6B24E
+      09
+        0x6B238:
+        r2 = 0x0D
+        goto 0x6B24E
+      0A
+        0x6B23C:
+        r2 = 0x10
+        goto 0x6B24E
+    0x6B24E:
+      // TODO what does this do?
+    0x6B2B8:
+      This part of the code deals with alpha blending:
+        r3 = alpha blending coefficient EVA
+        EVB = 16/16
 
 Layer map loading routine begins 0x6B722
 

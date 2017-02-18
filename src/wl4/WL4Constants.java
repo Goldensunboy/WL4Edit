@@ -12,6 +12,7 @@ public final class WL4Constants {
 		//      :                 Src: AA BB CC xx DD DD DD DD
 		//      :                 Dst: AA BB 00 CC 00 xx xx xx DD DD DD DD
 		// 01   : Layer 0 property bitvector (10 = enable, 20 = ???, 01 = ???, 02 = ???)
+		//      :   Bit 5 (0x20) unset: Priority 2 0 1 3
 		// 02   : Layer 1 properties (always 10)
 		// 03   : Layer 2 properties
 		// 04   : Layer 3 properties (commonly 20... ?)

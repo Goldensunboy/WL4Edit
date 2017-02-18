@@ -69,6 +69,7 @@ public class DataTester {
 		private WL4Level[] levels;
 		private int levelIdx = 0;
 		private int areaIdx = 0;
+		private int mask = 0xF;
 		public AreaTestFrame(WL4Level[] levels) {
 			this.levels = levels;
 			this.addWindowListener(new WindowListener() {
@@ -112,6 +113,18 @@ public class DataTester {
 						}
 					} else if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 						System.exit(0);
+					} else if(e.getKeyCode() == KeyEvent.VK_1) {
+						mask ^= 1;
+						repaint();
+					} else if(e.getKeyCode() == KeyEvent.VK_2) {
+						mask ^= 2;
+						repaint();
+					} else if(e.getKeyCode() == KeyEvent.VK_3) {
+						mask ^= 4;
+						repaint();
+					} else if(e.getKeyCode() == KeyEvent.VK_4) {
+						mask ^= 8;
+						repaint();
 					}
 				}
 				@Override
@@ -143,9 +156,11 @@ public class DataTester {
 				super.paintComponent(g);
 				g.setColor(Color.BLACK);
 				g.fillRect(0, 0, getWidth(), getHeight());
-				area.draw(g, SCALE);
+				area.draw(g, SCALE, mask);
 				g.setColor(Color.WHITE);
-				g.drawString(String.format("Level: %02X Area: %02X", levelIdx, areaIdx), 5, getHeight() - 5);
+				g.drawString(String.format("Level: %02X Area: %02X Layers: %d %d %d %d",
+						levelIdx, areaIdx, mask & 1, (mask >> 1) & 1, (mask >> 2) & 1,
+						(mask >> 3) & 1), 5, getHeight() - 5);
 			}
 		}
 	}

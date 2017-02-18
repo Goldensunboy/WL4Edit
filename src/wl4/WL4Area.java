@@ -15,16 +15,19 @@ public class WL4Area {
 	/** Area data */
 	public int width;
 	public int height;
-	public short[][] layermap = new short[4][];
-	public byte[] layerproperties;
-	public int[] layerwidth = new int[4];
-	public int[] layerheight = new int[4];
+	public short[][] layerMap = new short[4][];
+	public byte[] layerProperties;
+	public int[] layerWidth = new int[4];
+	public int[] layerHeight = new int[4];
+	public int[] layerPriority = new int[4];
+	public double alphaBlendingOpacity = 0;
 	
 	/** Graphical data */
 	public GBAPalette[] palette = new GBAPalette[16];
 	public Tile8x8[] tileGFX = new Tile8x8[0x600];
 	public Map16Tile[] map16 = new Map16Tile[0x300];
 	public Tile8x8[][] dmaps = new Tile8x8[4][];
+	
 	
 	public String name;
 	
@@ -88,23 +91,23 @@ public class WL4Area {
 		int dim = WL4Utils.GetShort(data, WL4Utils.GetPointer(data, ahptr + 0xC));
 		width = dim & 0xFF;
 		height = (dim >> 8) & 0xFF;
-		layerproperties = Arrays.copyOfRange(data, ahptr + 1, ahptr + 5);
+		layerProperties = Arrays.copyOfRange(data, ahptr + 1, ahptr + 5);
 		
 		// Decompress graphical maps by layer
 		for(int i = 0; i < 4; ++i) {
 			int layerptr = WL4Utils.GetPointer(data, ahptr + 0x8 + (i << 2));
-			RLEData layerlower, layerupper;
+			RLEData layerLower, layerUpper;
 			// Determine layer type
 			if((data[ahptr + i + 1] & 0x10) != 0) {
 				// Use map16
-				layerwidth[i] = data[layerptr] & 0xFF;
-				layerheight[i] = data[layerptr + 1] & 0xFF;
-				layerlower = WL4Utils.uncompressRLE(data, layerptr + 2);
-				layerupper = WL4Utils.uncompressRLE(data, layerptr + 2 + layerlower.compressedSize);
+				layerWidth[i] = data[layerptr] & 0xFF;
+				layerHeight[i] = data[layerptr + 1] & 0xFF;
+				layerLower = WL4Utils.uncompressRLE(data, layerptr + 2);
+				layerUpper = WL4Utils.uncompressRLE(data, layerptr + 2 + layerLower.compressedSize);
 			} else if((data[ahptr + i + 1] & 0x20) != 0) {
 				// Direct tiles
-				layerwidth[i] = 64;
-				layerheight[i] = 32; // TODO where do I find these values? dimensions of direct mapped BGs
+				layerWidth[i] = 64;
+				layerHeight[i] = 32; // TODO where do I find these values? dimensions of direct mapped BGs
 				switch(name.substring(0, 2)) {
 				case "02":
 				case "04":
@@ -112,7 +115,7 @@ public class WL4Area {
 				case "0D":
 				case "11":
 				case "12":
-					layerwidth[i] = 32;
+					layerWidth[i] = 32;
 					break;
 				case "13":
 					switch(name) {
@@ -124,68 +127,123 @@ public class WL4Area {
 					case "13-5":
 					case "13-6":
 					case "13-7":
-						layerwidth[i] = 32;
+						layerWidth[i] = 32;
 					}
 				}
-				layerlower = WL4Utils.uncompressRLE(data, layerptr + 1);
-				layerupper = WL4Utils.uncompressRLE(data, layerptr + 1 + layerlower.compressedSize);
+				layerLower = WL4Utils.uncompressRLE(data, layerptr + 1);
+				layerUpper = WL4Utils.uncompressRLE(data, layerptr + 1 + layerLower.compressedSize);
 			} else {
 				// Layer disabled
 				continue;
 			}
-			layermap[i] = new short[layerwidth[i] * layerheight[i]];
+			layerMap[i] = new short[layerWidth[i] * layerHeight[i]];
 			
 			// Error checking
-			if(layerlower.data == null || layerupper.data == null) {
+			if(layerLower.data == null || layerUpper.data == null) {
 				return;
 			}
-			if(layerlower.data.length != layerupper.data.length) {
+			if(layerLower.data.length != layerUpper.data.length) {
 				System.out.printf("Warning: Upper/Lower layer %d size mismatch for area 0x%06X!" +
-						" Lower: %d, upper: %d\n", i, ahptr, layerlower.data.length, layerupper.data.length);
+						" Lower: %d, upper: %d\n", i, ahptr, layerLower.data.length, layerUpper.data.length);
 			}
-			if(layerlower.data.length != layerwidth[i] * layerheight[i]) {
+			if(layerLower.data.length != layerWidth[i] * layerHeight[i]) {
 				System.out.printf("Warning: RLE data layer %d size mismatch for area 0x%06X!" +
-						" Size: %d, Dim: %d\n", i, ahptr, layerlower.data.length, layerwidth[i] * layerheight[i]);
+						" Size: %d, Dim: %d\n", i, ahptr, layerLower.data.length, layerWidth[i] * layerHeight[i]);
 			}
-			for(int j = 0; j < layerwidth[i] * layerheight[i]; ++j) {
-				layermap[i][j] = (short) (((0xFF & layerupper.data[j]) << 8) | (0xFF & layerlower.data[j]));
+			for(int j = 0; j < layerWidth[i] * layerHeight[i]; ++j) {
+				layerMap[i][j] = (short) (((0xFF & layerUpper.data[j]) << 8) | (0xFF & layerLower.data[j]));
 			}
 			
 			// If direct tile mapping, then create tiles
 			if((data[ahptr + i + 1] & 0x20) != 0) {
-				dmaps[i] = new Tile8x8[layerwidth[i] * layerheight[i]];
+				dmaps[i] = new Tile8x8[layerWidth[i] * layerHeight[i]];
 				for(int j = 0; j < dmaps[i].length; ++j) {
-					int idx = layermap[i][j] & 0x3FF;
-					dmaps[i][j] = new Tile8x8(tileGFX[0x200 + idx], layermap[i][j], palette);
+					int idx = layerMap[i][j] & 0x3FF;
+					dmaps[i][j] = new Tile8x8(tileGFX[0x200 + idx], layerMap[i][j], palette);
 				}
 			}
 		}
+		
+		// Set layer priority
+		layerPriority[3] = 3;
+		layerPriority[0] = layerPriority[1] = layerPriority[2] = 0;
+		int pri_idx = data[ahptr + 0x1A] & 0xFF;
+		if(pri_idx < 5 || (pri_idx & 3) == 0) {
+			layerPriority[1] = 1;
+			layerPriority[2] = 2;
+		} else if((pri_idx & 3) == 1) {
+			layerPriority[0] = 1;
+			layerPriority[2] = 2;
+		} else if((pri_idx & 3) == 2) {
+			layerPriority[0] = 1;
+			layerPriority[2] = 2;
+		} else {
+			layerPriority[0] = 2;
+			layerPriority[2] = 1;
+		}
+		
+		// Set alpha blending
+		if(pri_idx > 7) {
+			// Perform alpha blending
+			int EVA = (((pri_idx - 8) >> 2) * 3 + 7);
+			alphaBlendingOpacity = EVA / 16.0;
+			// TODO restructure draw() so layers are rendered separately for alpha blending
+		}
+	}
+	
+	/**
+	 * Return an array with the layer indexes in their appropriate draw order
+	 * @return
+	 */
+	private int[] drawOrder() {
+		int[] order = new int[4];
+		int idx = 0;
+		for(int i = 3; i >= 0; --i) {
+			for(int j = 0; j < 4; ++j) {
+				if(layerPriority[j] == i) {
+					order[idx++] = j;
+				}
+			}
+		}
+		return order;
 	}
 	
 	/**
 	 * Unfortunately, g.drawImage doesn't appear to work
 	 * @param g
 	 * @param scale
+	 * @param mask Which layers to draw
 	 */
-	public void draw(Graphics g, int scale) {
-		int[] vals = {3, 2, 0, 1}; // TODO get some proper layer priority going
-		for(int i : vals) {
-			if((layerproperties[i] & 0x10) != 0) {
-				// Use map16
-				for(int j = 0; j < layerheight[i]; ++j) {
-					for(int k = 0; k < layerwidth[i]; ++k) {
-						map16[layermap[i][j * layerwidth[i] + k]].draw(g, (k << 4) * scale, (j << 4) * scale, scale);
+	public void draw(Graphics g, int scale, int mask) {
+		for(int i : drawOrder()) {
+			if(((mask >> i) & 1) == 1) {
+				if((layerProperties[i] & 0x10) != 0) {
+					// Use map16
+					for(int j = 0; j < layerHeight[i]; ++j) {
+						for(int k = 0; k < layerWidth[i]; ++k) {
+							map16[layerMap[i][j * layerWidth[i] + k]].draw(
+									g, (k << 4) * scale, (j << 4) * scale, scale);
+						}
 					}
-				}
-			} else if((layerproperties[i] & 0x20) != 0) {
-				// Use direct tile map
-				for(int j = 0; j < (layerheight[1] << 1); ++j) {
-					for(int k = 0; k < (layerwidth[1] << 1); ++k) {
-						dmaps[i][(j % layerheight[i]) * layerwidth[i] + (k % layerwidth[i])].draw(
-								g, (k << 3) * scale, (j << 3) * scale, scale);
+				} else if((layerProperties[i] & 0x20) != 0) {
+					// Use direct tile map
+					for(int j = 0; j < (layerHeight[1] << 1); ++j) {
+						for(int k = 0; k < (layerWidth[1] << 1); ++k) {
+							dmaps[i][(j % layerHeight[i]) * layerWidth[i] + (k % layerWidth[i])].draw(
+									g, (k << 3) * scale, (j << 3) * scale, scale);
+						}
 					}
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Draw all layers
+	 * @param g
+	 * @param scale
+	 */
+	public void draw(Graphics g, int scale) {
+		draw(g, scale, 0xF);
 	}
 }
