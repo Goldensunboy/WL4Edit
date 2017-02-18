@@ -1,6 +1,7 @@
 package wl4;
 
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 /**
  * This class represents a Map16 tile, which is a concise way of pairing 4 8x8 tiles
@@ -30,7 +31,21 @@ public class Map16Tile {
 	}
 	
 	/**
-	 * Unfortunately, g.drawImage doesn't appear to work
+	 * Gets a BufferedImage of the tile
+	 * @return
+	 */
+	public BufferedImage getImage() {
+		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR);
+		Graphics g = img.getGraphics();
+		g.drawImage(tiles[0].getImage(), 0, 0, null);
+		g.drawImage(tiles[1].getImage(), 8, 0, null);
+		g.drawImage(tiles[2].getImage(), 0, 8, null);
+		g.drawImage(tiles[3].getImage(), 8, 8, null);
+		return img;
+	}
+	
+	/**
+	 * Legacy method for drawing map16 tiles
 	 * @param g
 	 * @param x
 	 * @param y

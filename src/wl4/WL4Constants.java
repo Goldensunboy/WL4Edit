@@ -11,18 +11,17 @@ public final class WL4Constants {
 		//      :               Copy 7 bytes to RAM 0x3003B08:
 		//      :                 Src: AA BB CC xx DD DD DD DD
 		//      :                 Dst: AA BB 00 CC 00 xx xx xx DD DD DD DD
-		// 01   : Layer 0 property bitvector (10 = enable, 20 = ???, 01 = ???, 02 = ???)
-		//      :   Bit 5 (0x20) unset: Priority 2 0 1 3
-		// 02   : Layer 1 properties (always 10)
+		// 01   : Layer 0 property bitvector (10 = use map16, 20 = directly mapped, 01 = ???, 02 = ???)
+		// 02   : Layer 1 properties (always 0x10)
 		// 03   : Layer 2 properties
-		// 04   : Layer 3 properties (commonly 20... ?)
+		// 04   : Layer 3 properties (commonly 0x20... ?)
 		// 05-07: Always 00
-		// 08-0B: Pointer to first area layer 0 data, subsequent areas are consecutive
-		// 0C-0F: Pointer to layer 1 data
-		// 10-13: Pointer to layer 2 data
-		// 14-17: Pointer to layer 3 data
+		// 08-0B: Pointer to RLE-compressed layer 0 data
+		// 0C-0F: Pointer to RLE-compressed layer 1 data
+		// 10-13: Pointer to RLE-compressed layer 2 data
+		// 14-17: Pointer to RLE-compressed layer 3 data
 		// 18-2B: Unknown
-	public static final int LEVEL_HEADER_TABLE = 0x639068; // 12-byte entries (area count = offset +1)
+	public static final int LEVEL_HEADER_TABLE = 0x639068; // 12-byte entries
 		// 00   : Unknown
 		// 01   : Number of areas
 		// 02-0B: Unknown
@@ -30,9 +29,9 @@ public final class WL4Constants {
 		// 00-03: Pointer to layer 0 + 1 tile graphics
 		// 04-07: Number of bytes the layer 0 + 1 tile graphics take up
 		// 08-0B: Pointer to 256-color stage palette
-    	// 0C-0F: Pointer to layer 3 graphics
-    	// 10-13: Number of bytes the layer 3 tile graphics take up
-    	// 14-17: Pointer to layer 1 map16 table
+		// 0C-0F: Pointer to layer 3 graphics
+		// 10-13: Number of bytes the layer 3 tile graphics take up
+		// 14-17: Pointer to layer 1 map16 table
 		// 18-1B: Unknown
 		// 1C-1F: Unknown
 		// 20-23: Unknown

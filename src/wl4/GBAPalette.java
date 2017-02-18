@@ -10,6 +10,8 @@ import java.awt.Color;
  */
 public class GBAPalette {
 	
+	private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
+	
 	/** Instance data */
 	Color[] colors = new Color[16];
 	
@@ -19,7 +21,8 @@ public class GBAPalette {
 	 * @param ptr The address of the beginning of palette data
 	 */
 	public GBAPalette(byte[] data, int ptr) {
-		for(int i = 0; i < 16; ++i) {
+		colors[0] = TRANSPARENT;
+		for(int i = 1; i < 16; ++i) {
 			short c = (short) ((data[ptr + (i << 1)] & 0xFF) | ((data[ptr + (i << 1) + 1] & 0xFF) << 8));
 			colors[i] = GBAtoColor(c);
 		}

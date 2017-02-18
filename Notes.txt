@@ -109,6 +109,8 @@ Level loading notes
 -------------------
 
 Alpha blending performed by writing 0x3E41 to BLDCNT
+  This constant enables transparency of layer 0 with all other layers below it
+EVA coefficient retrieved from second switch table in routine 0x6AF4C; EVB coefficient hardcoded at 16/16
 Alpha blending enabled if ahptr[0x1A] > 7
 If alpha blending enabled, goto 0x1C324 to set BLDCNT
   Then, proceed after VBlank is reached
@@ -151,8 +153,8 @@ Layer priority is set in subroutine 0x6AF4C:
         goto 0x6B2B8
       02
         0x6B248:
-        r3 = 0x0D
         goto 0x6B2B8
+        r3 = 0x0D
       03
         0x6B24C:
         r3 = 0x10

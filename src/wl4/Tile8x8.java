@@ -2,6 +2,8 @@ package wl4;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 /**
@@ -11,6 +13,7 @@ import java.awt.image.BufferedImage;
  */
 public class Tile8x8 {
 	
+	/** Default tile information */
 	private static final Color[] _pal = {
 		new Color(  0,   0,   0), new Color(255,   0,   0), new Color(  0, 255,   0), new Color(  0,   0, 255),
 		new Color(255, 255,   0), new Color(255,   0, 255), new Color(  0, 255, 255), new Color(255, 255, 255),
@@ -24,11 +27,17 @@ public class Tile8x8 {
 	private static final GBAPalette DEFAULT_PALETTE = new GBAPalette(_pal);
 	private static final GBAPalette BLACK_PALETTE = new GBAPalette(_pal2);
 	public static final Tile8x8 DEFAULT_TILE = new Tile8x8();
+	
+	// TODO cache all created tiles to reduce memory usage
 
 	/** Instance data */
 	private int[] pixelData = new int[8];
 	public boolean flipX = false, flipY = false;
 	public GBAPalette palette = DEFAULT_PALETTE;
+	
+	/** Graphics cache */
+	private BufferedImage img = null;
+	private int imghash = 0;
 	
 	/**
 	 * Construct a new Tile8x8 object from ROM data
@@ -112,33 +121,36 @@ public class Tile8x8 {
 	 * @return
 	 */
 	public BufferedImage getImage() {
-		BufferedImage img = new BufferedImage(8, 8, BufferedImage.TYPE_4BYTE_ABGR);
-		for(int y = 0; y < 8; ++y) {
-			for(int x = 0; x < 8; ++x) {
-				Color col = getColor(x, y);
-				int composite = col.getRed() | (col.getGreen() << 8) | (col.getBlue() << 16);
-				img.setRGB(x, y, composite);
+		if(img != null && img.hashCode() == imghash) {
+			return img;
+		} else {
+			BufferedImage newimg = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
+			for(int y = 0; y < 8; ++y) {
+				for(int x = 0; x < 8; ++x) {
+					Color col = getColor(x, y);
+					newimg.setRGB(x, y, col.getRGB());
+				}
 			}
+			imghash = newimg.hashCode();
+			return img = newimg;
 		}
-		return img;
 	}
 	
 	/**
-	 * Unfortunately, g.drawImage doesn't appear to work
+	 * Legacy method for drawing 8x8 tiles
 	 * @param g
 	 * @param x
 	 * @param y
 	 * @param scale
 	 */
 	public void draw(Graphics g, int x, int y, int scale) {
-		for(int i = 0; i < 8; ++i) {
-			for(int j = 0; j < 8; ++j) {
-				int idx = getColorIndex(j, i);
-				if(idx > 0) {
-					g.setColor(palette.colors[idx]);
-					g.fillRect(x + j * scale, y + i * scale, scale, scale);
-				}
-			}
-		}
+		BufferedImage tileimg = getImage();
+		BufferedImage scaledimg = new BufferedImage(
+				tileimg.getWidth() * scale, tileimg.getHeight() * scale, BufferedImage.TYPE_INT_ARGB);
+		AffineTransform at = new AffineTransform();
+		at.scale(scale, scale);
+		AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		op.filter(tileimg, scaledimg);
+		g.drawImage(scaledimg, x, y, null);
 	}
 }
