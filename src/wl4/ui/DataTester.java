@@ -164,7 +164,7 @@ public class DataTester {
 				g.setColor(Color.WHITE);
 				g.drawString(String.format("Level: (%02X) Area: (%02X) Layers: (%d %d %d %d) Alpha blending: (%s)",
 						levelIdx, areaIdx, mask & 1, (mask >> 1) & 1, (mask >> 2) & 1,
-						(mask >> 3) & 1, gbaAB ? "GBA" : "WL4Edit"), 5, getHeight() - 5);
+						(mask >> 3) & 1, gbaAB ? "GBA" : "Linear"), 5, getHeight() - 5);
 			}
 		}
 	}

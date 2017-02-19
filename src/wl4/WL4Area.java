@@ -44,8 +44,8 @@ public class WL4Area {
 		// Get header information
 		this.name = name;
 		
-		System.out.printf("0x%06X (%s): ", ahptr, name);
-		WL4Utils.PrintData(data, ahptr, 24 + 16, 24 + 16, 0);
+//		System.out.printf("0x%06X (%s): ", ahptr, name);
+//		WL4Utils.PrintData(data, ahptr, 24 + 16, 24 + 16, 0);
 //		WL4Utils.PrintData(data, WL4Constants.LEVEL_TILESET_TABLE + (data[ahptr] & 0xFF) * 36, 0x18, 0x18, 0);
 		
 		// Load static graphical information
@@ -116,33 +116,26 @@ public class WL4Area {
 				layerUpper = WL4Utils.uncompressRLE(data, layerptr + 2 + layerLower.compressedSize);
 			} else if((data[ahptr + i + 1] & 0x20) != 0) {
 				// Direct tiles
-				layerWidth[i] = 64;
-				layerHeight[i] = 32; // TODO where do I find these values? dimensions of direct mapped BGs
-				switch(name.substring(0, 2)) {
-				case "02":
-				case "04":
-				case "06":
-				case "0D":
-				case "11":
-				case "12":
-					layerWidth[i] = 32;
+				switch(data[layerptr] & 0xFF) {
+				case 0:
+					layerWidth[i] = layerHeight[i] = 32;
 					break;
-				case "13":
-					switch(name) {
-					case "13-0":
-					case "13-1":
-					case "13-2":
-					case "13-3":
-					case "13-4":
-					case "13-5":
-					case "13-6":
-					case "13-7":
-						layerWidth[i] = 32;
-					}
+				case 1:
+					layerWidth[i] = 64;
+					layerHeight[i] = 32;
+					break;
+				case 2:
+					layerWidth[i] = 32;
+					layerHeight[i] = 64;
+					break;
+				default:
+					System.out.printf("Invalid dimension byte encountered for 0x%06X layer %d: %d\n",
+							ahptr, i, data[layerptr] & 0xFF);
+					layerWidth[i] = layerHeight[i] = 0;
 				}
-				// Direct-mapped RLE data has 1-byte prefix (TODO what is it? layer size for LCD I/O BG control?)
 				layerLower = WL4Utils.uncompressRLE(data, layerptr + 1);
 				layerUpper = WL4Utils.uncompressRLE(data, layerptr + 1 + layerLower.compressedSize);
+				System.out.printf("%s-%d: %02X: %d\n", name, i, data[layerptr], layerLower.data.length);
 			} else {
 				// Layer disabled
 				continue;
@@ -170,6 +163,17 @@ public class WL4Area {
 			
 			// If direct tile mapping, then create tile objects
 			if((data[ahptr + i + 1] & 0x20) != 0) {
+				// Reorder tiles for BG dimension 1 (2x1 screenblocks)
+				if(data[layerptr] == 1) {
+					short[] rearranged = new short[layerMap[i].length];
+					for(int j = 0; j < 32; ++j) {
+						for(int k = 0; k < 32; ++k) {
+							rearranged[(j << 6) + k] = layerMap[i][(j << 5) + k];
+							rearranged[(j << 6) + k + 32] = layerMap[i][(j << 5) + k + 1024];
+						}
+					}
+					layerMap[i] = rearranged;
+				}
 				directMap[i] = new Tile8x8[layerWidth[i] * layerHeight[i]];
 				for(int j = 0; j < directMap[i].length; ++j) {
 					int idx = layerMap[i][j] & 0x3FF;

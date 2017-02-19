@@ -1,6 +1,6 @@
 Bugs:
 
-- BGs mapped directly by 8x8 tiles instead of map16 don't render properly because I haven't found where their dimensions are stored
+- Incorrect alpha blending in areas with hidden parts behind layer 0
 
 Milestone:
 
