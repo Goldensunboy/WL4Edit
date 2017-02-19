@@ -199,13 +199,32 @@ public class WL4Area {
 		
 		// Set alpha blending
 		if(pri_idx > 7) {
-			// Perform alpha blending
-			// Logically equivalent arithmetic to result from switch construct at ROM 0x6B152
-			int EVA = (((pri_idx - 8) >> 2) * 3 + 7);
+			// Logically equivalent to result from switch construct at ROM 0x6B152
+			int EVA = 0;
+			switch((pri_idx - 8) >> 2) {
+			case 0:
+				EVA = 7; break;
+			case 1:
+				EVA = 10; break;
+			case 2:
+			case 9:
+				EVA = 13; break;
+			case 3:
+			case 10:
+				EVA = 16; break;
+			case 4:
+				EVA = 0; break;
+			case 5:
+				EVA = 3; break;
+			case 6:
+				EVA = 6; break;
+			case 7:
+				EVA = 9; break;
+			case 8:
+				EVA = 11; break;
+			}
 			alphaBlendingLevel = (16 - EVA) / 16.0;
 		}
-		
-		// TODO what does subroutine 0x6B24E do? parameter: r2
 	}
 	
 	/**
@@ -268,8 +287,11 @@ public class WL4Area {
 	 * @param g The context to which the layers will be drawn
 	 * @param scale The amount by which the image should be scaled up
 	 * @param mask Which layers to draw
+	 * @param gbaAB Use GBA-style alhpa blending
 	 */
-	public void draw(Graphics g, int scale, int mask) {
+	public void draw(Graphics g, int scale, int mask, boolean gbaAB) {
+		BufferedImage canvas = new BufferedImage(g.getClipBounds().width, g.getClipBounds().height,
+				BufferedImage.TYPE_INT_ARGB);
 		
 		// Draw the layers in the appropriate order
 		for(int i : drawOrder()) {
@@ -295,23 +317,41 @@ public class WL4Area {
 							int composite = scaledimg.getRGB(k, j);
 							// Only modify alpha of opaque values
 							if((composite & 0xFF000000) != 0) {
-								int alpha = (int) (255 * alphaBlendingLevel);
-								scaledimg.setRGB(k, j, (composite & 0xFFFFFF) | (alpha << 24));
+								if(gbaAB) {
+									int target = canvas.getRGB(k, j);
+									int dr = Math.min(248, (target & 0xFF) +
+											(int) ((composite & 0xFF) * alphaBlendingLevel));
+									int dg = Math.min(248, ((target >> 8) & 0xFF) +
+											(int) (((composite >> 8) & 0xFF) * alphaBlendingLevel));
+									int db = Math.min(248, ((target >> 16) & 0xFF) +
+											(int) (((composite >> 16) & 0xFF) * alphaBlendingLevel));
+									canvas.setRGB(k, j, dr | (dg << 8) | (db << 16) | 0xFF000000);
+								} else {
+									int alpha = (int) (255 * alphaBlendingLevel);
+									scaledimg.setRGB(k, j, (composite & 0xFFFFFF) | (alpha << 24));
+								}
 							}
 						}
 					}
+					if(gbaAB) {
+						continue;
+					}
 				}
-				g.drawImage(scaledimg, 0, 0, null);
+				Graphics cg = canvas.getGraphics();
+				cg.drawImage(scaledimg, 0, 0, null);
+				cg.dispose();
 			}
 		}
+		g.drawImage(canvas, 0, 0, null);
 	}
 	
 	/**
 	 * Draw all layers
 	 * @param g The context to which the layers will be drawn
 	 * @param scale The amount by which the image should be scaled up
+	 * @param gbaAB Use GBA-style alhpa blending
 	 */
-	public void draw(Graphics g, int scale) {
-		draw(g, scale, 0xF);
+	public void draw(Graphics g, int scale, boolean gbaAB) {
+		draw(g, scale, 0xF, gbaAB);
 	}
 }

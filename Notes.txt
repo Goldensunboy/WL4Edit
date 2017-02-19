@@ -104,6 +104,7 @@ RAM Notes
 0x30000D8: Set alpha-blended layer's level (0 - 0x10)
 0x30000D9: Layer alpha (?)
 0x30000DA: Alpha blending target layers
+0x30000DB: ??? (related to alpha blending)
 
 Level loading notes
 -------------------
@@ -153,8 +154,8 @@ Layer priority is set in subroutine 0x6AF4C:
         goto 0x6B2B8
       02
         0x6B248:
-        goto 0x6B2B8
         r3 = 0x0D
+        goto 0x6B2B8
       03
         0x6B24C:
         r3 = 0x10
@@ -188,7 +189,7 @@ Layer priority is set in subroutine 0x6AF4C:
         r2 = 0x10
         goto 0x6B24E
     0x6B24E:
-      // TODO what does this do?
+      Also alpha blending. Not sure how it differs from 0x6B2B8
     0x6B2B8:
       This part of the code deals with alpha blending:
         r3 = alpha blending coefficient EVA

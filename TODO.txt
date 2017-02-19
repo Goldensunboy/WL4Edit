@@ -1,7 +1,6 @@
 Bugs:
 
 - BGs mapped directly by 8x8 tiles instead of map16 don't render properly because I haven't found where their dimensions are stored
-- Layer 0 alpha masking is close, but doesn't render quite like GBA's alpha blending
 
 Milestone:
 
