@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class represents an indexed-graphics, 8x8 tile on the GBA
@@ -28,7 +30,8 @@ public class Tile8x8 {
 	private static final GBAPalette BLACK_PALETTE = new GBAPalette(_pal2);
 	public static final Tile8x8 DEFAULT_TILE = new Tile8x8();
 	
-	// TODO cache all created tiles to reduce memory usage
+	// Cache all created tiles to reduce memory usage
+	private static Map<Tile8x8, Tile8x8> tileCache = new HashMap<Tile8x8, Tile8x8>();
 
 	/** Instance data */
 	private int[] pixelData = new int[8];
@@ -44,7 +47,7 @@ public class Tile8x8 {
 	 * @param data The ROM data
 	 * @param ptr Pointer to the beginning of the 8x8 graphics
 	 */
-	public Tile8x8(byte[] data, int ptr) {
+	private Tile8x8(byte[] data, int ptr) {
 		for(int i = 0; i < 8; ++i) {
 			pixelData[i] = 0;
 			for(int j = 0; j < 4; ++j) {
@@ -56,10 +59,40 @@ public class Tile8x8 {
 	}
 	
 	/**
+	 * Construct and return a new Tile8x8, or its cached equivalent if it's been created before
+	 * @param data The ROM data
+	 * @param ptr Pointer to the beginning of the 8x8 graphics
+	 * @return The tile
+	 */
+	public static Tile8x8 create(byte[] data, int ptr) {
+		Tile8x8 t = new Tile8x8(data, ptr);
+		if(tileCache.containsKey(t)) {
+			return tileCache.get(t);
+		} else {
+			tileCache.put(t, t);
+			return t;
+		}
+	}
+	
+	/**
+	 * Get the cached version of a tile, if it exists in the tile cache
+	 * @param t The tile data to look for a cache hit
+	 * @return The original tile, or cached version
+	 */
+	private static Tile8x8 getCachedTile(Tile8x8 t) {
+		if(tileCache.containsKey(t)) {
+			return tileCache.get(t);
+		} else {
+			tileCache.put(t, t);
+			return t;
+		}
+	}
+	
+	/**
 	 * Copy constructor
 	 * @param other Another Tile8x8 to copy
 	 */
-	public Tile8x8(Tile8x8 other) {
+	private Tile8x8(Tile8x8 other) {
 		for(int i = 0; i < 8; ++i) {
 			pixelData[i] = other.pixelData[i];
 		}
@@ -69,15 +102,18 @@ public class Tile8x8 {
 	}
 	
 	/**
-	 * Copy constructor for data, but with different properties
-	 * @param other Another Tile8x8 to copy
-	 * @param properties The new properties
+	 * Copy constructor for data, but with different properties. Also caches tile
+	 * @param other Another tile to copy
+	 * @param properties Properties bitvector
+	 * @param pals Palette selection
+	 * @return The new (or cached) tile
 	 */
-	public Tile8x8(Tile8x8 other, short properties, GBAPalette[] pals) {
-		this(other);
-		flipX = (properties & (1 << 0xA)) != 0;
-		flipY = (properties & (1 << 0xB)) != 0;
-		palette = pals[(properties >> 12) & 0xF];
+	public static Tile8x8 create(Tile8x8 other, short properties, GBAPalette[] pals) {
+		Tile8x8 t = new Tile8x8(other);
+		t.flipX = (properties & (1 << 0xA)) != 0;
+		t.flipY = (properties & (1 << 0xB)) != 0;
+		t.palette = pals[(properties >> 12) & 0xF];
+		return getCachedTile(t);
 	}
 	
 	/**
@@ -152,5 +188,42 @@ public class Tile8x8 {
 		AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 		op.filter(tileimg, scaledimg);
 		g.drawImage(scaledimg, x, y, null);
+	}
+	
+	/**
+	 * Determine if two tiles are equal
+	 * If their data, flip values and palettes are the same, they are equal
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof Tile8x8) {
+			Tile8x8 t = (Tile8x8) o;
+			for(int i = 0; i < 8; ++i) {
+				if(pixelData[i] != t.pixelData[i]) {
+					return false;
+				}
+			}
+			return flipX == t.flipX && flipY == t.flipY && palette.equals(t.palette);
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Compute a collision-resistant hashcode value for this tile
+	 */
+	@Override
+	public int hashCode() {
+		int hash = pixelData[0];
+		for(int i = 1; i < 8; ++i) {
+			hash ^= ((pixelData[i] >> i) & ((1 << (32 - i)) - 1)) | (pixelData[i] << (32 - i));
+		}
+		if(flipX) {
+			hash ^= 1;
+		}
+		if(flipY) {
+			hash ^= 2;
+		}
+		return hash ^ palette.hashCode();
 	}
 }

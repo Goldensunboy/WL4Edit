@@ -63,12 +63,12 @@ public class WL4Area {
 		// FG/near-bg tiles
 		// Stored after the animated tiles and one blank tile
 		for(int i = 0; i < (fgGFXlen >> 5); ++i) {
-			tileGFX[i + 0x41] = new Tile8x8(data, fgGFXptr + (i << 5));
+			tileGFX[i + 0x41] = Tile8x8.create(data, fgGFXptr + (i << 5));
 		}
 		// Far BG tiles
 		// These are stored at the end of the 8x8 tile entries, behind a "blank" tile in the last slot
 		for(int i = 0; i < (bgGFXlen >> 5); ++i) {
-			tileGFX[tileGFX.length - 1 - (bgGFXlen >> 5) + i] = new Tile8x8(data, bgGFXptr + (i << 5));
+			tileGFX[tileGFX.length - 1 - (bgGFXlen >> 5) + i] = Tile8x8.create(data, bgGFXptr + (i << 5));
 		}
 		// Empty tiles
 		tileGFX[0x40] = tileGFX[tileGFX.length - 1] = Tile8x8.DEFAULT_TILE;
@@ -83,14 +83,14 @@ public class WL4Area {
 			int fidx = WL4Utils.GetShort(data, fptr + (i << 1)); // frame index
 			int gidx = WL4Utils.GetPointer(data, WL4Constants.ANIMATION_GFX_TABLE + (fidx << 3) + 4); // GFX index
 			for(int j = 0; j < 4; ++j) {
-				tileGFX[(i << 2) + j] = new Tile8x8(data, gidx + (j << 5));
+				tileGFX[(i << 2) + j] = Tile8x8.create(data, gidx + (j << 5));
 			}
 		}
 		
 		// Load map16 information
 		int map16ptr = WL4Utils.GetPointer(data, tptr + 0x14); // Pointer to start of map16 for this area
 		for(int i = 0; i < map16.length; ++i) {
-			map16[i] = new Map16Tile(data, map16ptr + (i << 3), tileGFX, palette);
+			map16[i] = Map16Tile.create(data, map16ptr + (i << 3), tileGFX, palette);
 		}
 		
 		// Set dimensions
@@ -176,7 +176,7 @@ public class WL4Area {
 				directMap[i] = new Tile8x8[layerWidth[i] * layerHeight[i]];
 				for(int j = 0; j < directMap[i].length; ++j) {
 					int idx = layerMap[i][j] & 0x3FF;
-					directMap[i][j] = new Tile8x8(tileGFX[0x200 + idx], layerMap[i][j], palette);
+					directMap[i][j] = Tile8x8.create(tileGFX[0x200 + idx], layerMap[i][j], palette);
 				}
 			}
 		}

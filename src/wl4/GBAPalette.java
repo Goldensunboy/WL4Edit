@@ -49,4 +49,35 @@ public class GBAPalette {
 		int b = ((c >> 10) & 0x1F) << 3;
 		return new Color(r, g, b);
 	}
+	
+	/**
+	 * Determine if two palettes are equal
+	 * If their colors are the same, then they are equal palettes
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof GBAPalette) {
+			GBAPalette p = (GBAPalette) o;
+			for(int i = 0; i < 16; ++i) {
+				if(!colors[i].equals(p.colors[i])) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Compute a collision-resistant hashcode value for this palette
+	 */
+	@Override
+	public int hashCode() {
+		int hash = colors[0].hashCode();
+		for(int i = 1; i < 15; ++i) {
+			hash ^= (colors[i].hashCode() << i) | ((colors[i].hashCode() >> (32 - i)) & ((1 << i) - 1));
+		}
+		return hash;
+	}
 }
