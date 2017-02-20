@@ -70,7 +70,7 @@ public class DataTester {
 		private int levelIdx = 0;
 		private int areaIdx = 0;
 		private int mask = 0xF;
-		private boolean gbaAB = true;
+		private boolean enableAB = true;
 		public AreaTestFrame(WL4Level[] levels) {
 			this.levels = levels;
 			this.addWindowListener(new WindowListener() {
@@ -127,7 +127,7 @@ public class DataTester {
 						mask ^= 8;
 						repaint();
 					} else if(e.getKeyCode() == KeyEvent.VK_A) {
-						gbaAB = !gbaAB;
+						enableAB = !enableAB;
 						repaint();
 					}
 				}
@@ -160,11 +160,17 @@ public class DataTester {
 				super.paintComponent(g);
 				g.setColor(Color.BLACK);
 				g.fillRect(0, 0, getWidth(), getHeight());
-				area.draw(g, SCALE, mask, gbaAB);
+				area.draw(g, SCALE, mask, enableAB);
 				g.setColor(Color.WHITE);
-				g.drawString(String.format("Level: (%02X) Area: (%02X) Layers: (%d %d %d %d) Alpha blending: (%s)",
-						levelIdx, areaIdx, mask & 1, (mask >> 1) & 1, (mask >> 2) & 1,
-						(mask >> 3) & 1, gbaAB ? "GBA" : "Linear"), 5, getHeight() - 5);
+				g.drawString(String.format("Level: (%02X) Area: (%02X) Layers: (%s %s %s %s) Alpha blending: (%s)",
+						levelIdx,
+						areaIdx,
+						(mask & 1) != 0 ? "0" : "-",
+						((mask >> 1) & 1) != 0 ? "1" : "-",
+						((mask >> 2) & 1) != 0 ? "2" : "-",
+						((mask >> 3) & 1) != 0 ? "3" : "-",
+						enableAB ? "ON" : "OFF"
+				), 5, getHeight() - 5);
 			}
 		}
 	}
