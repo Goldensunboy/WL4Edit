@@ -88,6 +88,8 @@ RAM Notes
 
 0x3000024: Possibly the starting area for the level? Untested
 
+0x3000025: Related to object tileset. Difficulty?
+
 0x300002A: Light blurring (0 - 0x10)
 0x300002B: Lighting (0 - 0x10)
 0x3000037: Waving background
@@ -106,6 +108,15 @@ RAM Notes
 0x30000DA: Alpha blending target layers
 0x30000DB: ??? (related to alpha blending)
 
+
+
+Music Data
+----------
+
+Function that writes to direct sound DMA registers: 0x16C4
+
+
+
 Level loading notes
 -------------------
 
@@ -117,7 +128,7 @@ If alpha blending enabled, goto 0x1C324 to set BLDCNT
   Then, proceed after VBlank is reached
 
 0x6B3E8: Stores character base block in r0, used in preparation of LCD I/O BG control
-Layer priority is set in subroutine 0x6AF4C:
+Layer priority and alpha blending is set in subroutine 0x6AF4C:
     NOTE: This function extensively uses switch tables! Destination addresses hardcoded
     into tables 0x6AFFC and 0x6B174, triggered by loading r15 (program counter)
   Start with priority 0 0 0 3
@@ -225,10 +236,10 @@ Process (following parenthesized values are dynamic values for Hall of Heiroglyp
       sp + 0x20 (0x08556DDC): ???
 
 Layer 3 (far BG) graphics are DMA'd into (0x600FFE0 - size_in_bytes)
-Small DMA from 0x3F2020 to 0x600FFE0 (size 0x10 halfwords)
+Small DMA from 0x3F2020 to 0x600FFE0 (size 0x10 halfwords, it's the blank far BG tile)
 DMA from 0x201F041 to 0x6003000 (size X bytes)
   X is return value (in r0) from subroutine at 0x6BDF8, the area loading subroutine
-  This DMA is probably copying BG map data directly to memory (layer 3?)
+  This DMA is copying layer 3 BG map data directly to memory
 
 DMA from 0x616868 to 0x6004000 (size 0x40 halfwords) ; \ Loading the animated tiles into low tile slots
 DMA from 0x617368 to 0x6004080 (size 0x40 halfwords) ; | Slots 0 - 3F. Starting addresses obtained through
@@ -249,7 +260,7 @@ DMA from 0x616868 to 0x6004780 (size 0x40 halfwords) ; /
 
 DMA from 0x34BD82 to 0x6010000 (size 0x120 bytes)
 DMA from 0x34BEA2 to 0x6010400 (size 0x100 bytes)
-DMA from 0x30030D0 (RAM) to 0x5000200 (size 0x20 bytes, OAM data?)
+DMA from 0x30030D0 (RAM) to 0x5000200 (size 0x20 bytes, palette data)
 DMA from 0x403AE8 to 0x6011080 (size 0x10 halfwords)
 DMA from 0x403C68 to 0x6011000 (size 0x10 halfwords)
 DMA from 0x403DE8 to 0x6011400 (size 0x10 halfwords)
@@ -259,15 +270,33 @@ DMA from 0x403C48 to 0x6011060 (size 0x10 halfwords)
 DMA from 0x403DC8 to 0x6011460 (size 0x10 halfwords)
 DMA from 0x403D88 to 0x6011020 (size 0x10 halfwords)
 DMA from 0x403F08 to 0x6011420 (size 0x10 halfwords)
-DMA from 0x414A64 to 0x5000280 (size 0x10 halfwords, OAM data?)
+DMA from 0x414A64 to 0x5000280 (size 0x10 halfwords, palette data)
 DMA from 0x4045C8 to 0x6011C20 (size 0x10 halfwords)
 DMA from 0x4045E8 to 0x6012020 (size 0x10 halfwords)
 DMA from 0x404608 to 0x6012000 (size 0x10 halfwords)
 DMA from 0x404628 to 0x6011C00 (size 0x10 halfwords)
 DMA from 0x352CF0 to 0x6017800 (size loaded as int32 from 0x3B2C90 = #0x800 bytes)
-DMA from 0x3B14F0 to 0x50003E0 (size 0x10 halfwords, OAM data?)
+DMA from 0x3B14F0 to 0x50003E0 (size 0x10 halfwords, palette data)
+
 DMA from 0x365CF0 to 0x6014000 (size loaded as int32 from 0x3B2CF4 = #0x2000 bytes)
-  (...)
+  Subroutine for loading this tileset begins 0x1DEC0
+  This appears to be part of the area sprite tileset, the first 0x2000 out of 0x3800 bytes
+  Performed at 0x1DF70, though source address gotten several lines before
+    r3 = [0x78F21C + 4 * [0x3000023]] // byte, 0x6B910
+    r3 += 12 * [0x3000025] // byte
+    [0x3000027] = [r3 + 9]             // 0x6B930
+    -----------------------------------
+    r0 =  [0x3000027]                  // 0x1DECC
+    r3 =  [0x78EF78 + (r0 * 4)] - 0x10 // 0x1DF20
+    src = [0x78EBF0 + (r3 * 4)]        // 0x1DF5E
+
+
+  (...) More DMAs
+
+
+
+Area Loading Notes
+------------------
 
 Loading 8x8 tiles from map16 starting at 0x6BC72
 0x30031F4 contains a pointer to data used here (Hall of Heiroglyphs: 0x557ABC)

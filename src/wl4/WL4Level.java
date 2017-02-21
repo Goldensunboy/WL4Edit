@@ -21,7 +21,7 @@ public class WL4Level {
 
 		// Get pointer information for this level
 		int lhptr = WL4Constants.LEVEL_HEADER_TABLE + lvidx * 12;
-		int ahptr = WL4Utils.GetPointer(data, WL4Constants.LEVEL_DATA_PTR_TABLE + (lvidx << 2));
+		int ahptr = WL4Utils.GetPointer(data, WL4Constants.AREA_DATA_PTR_TABLE + (lvidx << 2));
 		
 		// Initialize area data
 		int areaCount = data[lhptr + 1] & 0xFF;

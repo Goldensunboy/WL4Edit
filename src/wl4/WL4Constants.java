@@ -3,7 +3,7 @@ package wl4;
 public final class WL4Constants {
 	
 	/** Constants */
-	public static final int LEVEL_DATA_PTR_TABLE = 0x78F280; // 4-byte pointers to 42-byte area entries
+	public static final int AREA_DATA_PTR_TABLE = 0x78F280; // 4-byte pointers to 42-byte area entries
 		// 00   : (Offset / 36) from 0x3F2298 for tptr value for area tileset
 		//      : (Offset / 16) from 0x3F8C18 for animation data dependent upon switches
 		//      : (offset / 32) from 0x3F8098 which contains animation frame index data

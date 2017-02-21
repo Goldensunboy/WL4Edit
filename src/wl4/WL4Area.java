@@ -37,7 +37,7 @@ public class WL4Area {
 	/**
 	 * Construct a new Area object from ROM data and a starting address
 	 * @param data The ROM data
-	 * @param ahptr Pointer to the start of the area header data
+	 * @param ahptr Pointer to the start of the area header data (table 0x78F280)
 	 */
 	public WL4Area(String name, byte[] data, int ahptr) {
 		
@@ -45,7 +45,7 @@ public class WL4Area {
 		this.name = name;
 		
 //		System.out.printf("0x%06X (%s): ", ahptr, name);
-//		WL4Utils.PrintData(data, ahptr, 24 + 16, 24 + 16, 0);
+//		WL4Utils.PrintData(data, ahptr, 0x2c, 0x2c, 0);
 //		WL4Utils.PrintData(data, WL4Constants.LEVEL_TILESET_TABLE + (data[ahptr] & 0xFF) * 36, 0x18, 0x18, 0);
 		
 		// Load static graphical information
