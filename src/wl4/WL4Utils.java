@@ -34,6 +34,20 @@ public class WL4Utils {
 	}
 	
 	/**
+	 * Load a litt-endian int value from ROM data
+	 * @param data The ROM data
+	 * @param addr The address of the int value
+	 * @return The int value
+	 */
+	public static int GetInt(byte[] data, int addr) {
+		int a = 0xFF & data[addr];
+		int b = 0xFF & data[addr + 1];
+		int c = 0xFF & data[addr + 2];
+		int d = 0xFF & data[addr + 3];
+		return a | (b << 8) | (c << 16) | (d << 24);
+	}
+	
+	/**
 	 * Print data for ease of use in viewing the bytes
 	 * @param data ROM data
 	 * @param ptr Pointer to first byte of data to print

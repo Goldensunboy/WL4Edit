@@ -14,6 +14,7 @@ hs_err_pid*
 # ROM stuff
 *.gba
 *.bin
+*.SNA
 
 # Eclipse files
 .classpath

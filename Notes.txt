@@ -29,7 +29,7 @@ RAM Notes
   05: Mini-game shop
   06: Boss door
 
-0x3000004: Current level number (used for level data)
+0x3000004: Current level number (used for level header)
   00: Hall of Heiroglyphs
   01: Palm Tree Paradise
   02: Wildflower Fields
@@ -86,9 +86,9 @@ RAM Notes
   16: ???
   17: Golden Passage
 
-0x3000024: Possibly the starting area for the level? Untested
-
-0x3000025: Related to object tileset. Difficulty?
+0x3000023: Current tileset
+0x3000024: Area ID
+0x3000025: Which door is used to enter the room
 
 0x300002A: Light blurring (0 - 0x10)
 0x300002B: Lighting (0 - 0x10)
@@ -119,6 +119,9 @@ Function that writes to direct sound DMA registers: 0x16C4
 
 Level loading notes
 -------------------
+
+0x7A714: Set the 0x3000004 memory address to hold the level header index, based on passage and level
+0x7A738: Set the 0x3000023 memory address to hold area data index based on 0x3000004 value
 
 Alpha blending performed by writing 0x3E41 to BLDCNT
   This constant enables transparency of layer 0 with all other layers below it
@@ -336,6 +339,22 @@ Data + 00: Area width (in map16 tiles)
          - A short containing the area width in map16 tiles
          - A short containing the area height in map16 tiles
          - An array of shorts (width * height in length) referencing map16 entries; upper bound 0x2FF for valid tiles
+  If the layer data is for a direct-tile BG, then instead of an area width and height at the beginning, there is instead one byte:
+    00: BG takes up 1 screen block (32x32 tiles)
+    01: BG takes up 2 screen blocks, horizontal (64x32 tiles)
+    02: BG takes up 2 screen blocks, vertical (32x64 tiles)
+      WL4 does not have any stages with direct-tile BGs that take up 4 screen blocks, though in theory it should be possible
+      Be careful of the tile arrangement in case 01: GBA screen blocks are organized like so:
+        00 01 02 03 | 10 11 12 13 (for brevity, 4x4 screen blocks shown; actual is 32x32)
+        04 05 06 07 | 14 15 16 17
+        08 09 0A 0B | 18 19 1A 1B
+        0C 0D 0E 0F | 1C 1D 1E 1F
+      The number is the index from the start of map data where the tile is, but due to the ordering, a rendering algorithm
+      will require rearrangement of the data like so:
+        00 01 02 03 | 04 05 06 07
+        08 09 0A 0B | 0C 0D 0E 0F
+        10 11 12 13 | 14 15 16 17
+        18 19 1A 1B | 1C 1D 1E 1F
 
 Area loading subroutine notes:
 

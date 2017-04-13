@@ -21,6 +21,9 @@ public final class WL4Constants {
 		// 10-13: Pointer to RLE-compressed layer 2 data
 		// 14-17: Pointer to RLE-compressed layer 3 data
 		// 18-2B: Unknown
+	public static final int LEVEL_HEADER_IDX_TABLE = 0x6391C4;
+		// Index by [level * 4 + passage * 24] for 4-byte entry that is an index into
+		//   the level header table, whose entries are disjoint with respect to level index
 	public static final int LEVEL_HEADER_TABLE = 0x639068; // 12-byte entries
 		// 00   : Unknown
 		// 01   : Number of areas

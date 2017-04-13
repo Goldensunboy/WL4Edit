@@ -13,7 +13,34 @@ import wl4.ui.DataTester;
  */
 public class WL4Edit {
 	
-	public static final int LEVEL_COUNT = 20;
+	/** Available passages and levels */
+	public static final int[] LEVELS = {
+		0, 0,
+		0, 4,
+		1, 0,
+		1, 1,
+		1, 2,
+		1, 3,
+		1, 4,
+		2, 0,
+		2, 1,
+		2, 2,
+		2, 3,
+		2, 4,
+		3, 0,
+		3, 1,
+		3, 2,
+		3, 3,
+		3, 4,
+		4, 0,
+		4, 1,
+		4, 2,
+		4, 3,
+		5, 4,
+		5, 0,
+		5, 4,
+	};
+	public static final int LEVEL_COUNT = LEVELS.length / 2;
 	
 	/** ROM data instance */
 	public static final String ROM_FILE = "WL4.gba";
@@ -27,10 +54,15 @@ public class WL4Edit {
 		}
 	}
 	
+	/**
+	 * For the time being, just test data representation
+	 * @param args Unused
+	 */
 	public static void main(String[] args) {
 		WL4Level[] levels = new WL4Level[LEVEL_COUNT];
-		for(int i = 0; i < LEVEL_COUNT; ++i) {
-			levels[i] = new WL4Level(String.format("%02X", i), ROM_DATA, i);
+		for(int i = 0; i < LEVELS.length; i += 2) {
+			levels[i >> 1] = new WL4Level(String.format("%d-%d", LEVELS[i], LEVELS[i + 1]),
+					ROM_DATA, LEVELS[i], LEVELS[i + 1]);
 		}
 		
 //		Tile8x8[][] tilesArr = new Tile8x8[levels.length][];

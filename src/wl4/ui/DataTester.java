@@ -162,8 +162,8 @@ public class DataTester {
 				g.fillRect(0, 0, getWidth(), getHeight());
 				area.draw(g, SCALE, mask, enableAB);
 				g.setColor(Color.WHITE);
-				g.drawString(String.format("Level: (%02X) Area: (%02X) Layers: (%s %s %s %s) Alpha blending: (%s)",
-						levelIdx,
+				g.drawString(String.format("Level: (%s) Area: (%02X) Layers: (%s %s %s %s) Alpha blending: (%s)",
+						levels[levelIdx].name,
 						areaIdx,
 						(mask & 1) != 0 ? "0" : "-",
 						((mask >> 1) & 1) != 0 ? "1" : "-",

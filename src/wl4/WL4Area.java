@@ -57,9 +57,9 @@ public class WL4Area {
 			palette[i] = new GBAPalette(data, palPtr + (i << 5));
 		}
 		int fgGFXptr = WL4Utils.GetPointer(data, tptr); // layers 0, 1 and 2
-		int fgGFXlen = WL4Utils.GetPointer(data, tptr + 4);
+		int fgGFXlen = WL4Utils.GetInt(data, tptr + 4);
 		int bgGFXptr = WL4Utils.GetPointer(data, tptr + 12); // layer 3
-		int bgGFXlen = WL4Utils.GetPointer(data, tptr + 16);
+		int bgGFXlen = WL4Utils.GetInt(data, tptr + 16);
 		// FG/near-bg tiles
 		// Stored after the animated tiles and one blank tile
 		for(int i = 0; i < (fgGFXlen >> 5); ++i) {
@@ -81,9 +81,10 @@ public class WL4Area {
 		int fptr = WL4Constants.ANIMATION_FRAME_TABLE + (toffset << 5); // pointer to animation frame data
 		for(int i = 0; i < 16; ++i) {
 			int fidx = WL4Utils.GetShort(data, fptr + (i << 1)); // frame index
-			int gidx = WL4Utils.GetPointer(data, WL4Constants.ANIMATION_GFX_TABLE + (fidx << 3) + 4); // GFX index
+			// Pointer to GFX data
+			int gptr = WL4Utils.GetPointer(data, WL4Constants.ANIMATION_GFX_TABLE + (fidx << 3) + 4);
 			for(int j = 0; j < 4; ++j) {
-				tileGFX[(i << 2) + j] = Tile8x8.create(data, gidx + (j << 5));
+				tileGFX[(i << 2) + j] = Tile8x8.create(data, gptr + (j << 5));
 			}
 		}
 		
